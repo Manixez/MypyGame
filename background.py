@@ -1,34 +1,29 @@
 import pygame
 from dasar import *
 
-class Bg():
+class BaseBg():
     def __init__(self):
-        self.logo_surf = pygame.image.load('Assets\Bg\Icon.png')
-        self.logo_rect = self.logo_surf.get_rect(center = (285, 100))
-
+        self.logo_surf = pygame.image.load('Assets/Bg/Icon.png')
+        self.logo_rect = self.logo_surf.get_rect(center = (500, 150))
 
     def display_logo(self):
-        layar.blit(self.logo_surf,self.logo_rect)
-    
+        screen.blit(self.logo_surf,self.logo_rect)
 
 # untuk menampilkan tema 1
-class Bg_1(Bg):
-    def __init__(self):
+class Bg(BaseBg):
+    def __init__(self, backgroundName: str):
         super().__init__()
-        self.sky_surface = pygame.image.load('Assets\Bg\Background1.jpg').convert_alpha()
-        self.ground_surface = pygame.image.load('Assets\Bg\tanah1.png').convert_alpha()
+        self.sky_surface = pygame.image.load(f'Assets/Bg/{backgroundName}.jpg').convert_alpha()
+        self.sky_surface = pygame.transform.scale(self.sky_surface,(1000,600))
+        self.sky_surface_blur = pygame.image.load(f'Assets/Bg/{backgroundName}_blur.jpg').convert_alpha()
+        self.sky_surface_blur = pygame.transform.scale(self.sky_surface_blur,(1000,600))
+        self.ground_surface = pygame.image.load('Assets/Bg/tanah1.png').convert_alpha()
+        self.ground_surface = pygame.transform.scale(self.ground_surface,(1000,100))
 
     def display_bg(self):
-        layar.blit(self.sky_surface, (0,0))
-        layar.blit(self.ground_surface, (0,254))
+        screen.blit(self.sky_surface, (0,0))
+        screen.blit(self.ground_surface, (0,500))
 
-# untuk menampilkan tema 2
-class Bg_2(Bg):
-    def __init__(self):
-        super().__init__()
-        self.sky_surface = pygame.image.load('Assets\Bg\Background2.jpg').convert_alpha()
-        self.ground_surface = pygame.image.load('Assets\Bg\tanah1.png').convert_alpha()
-
-    def display_bg(self):
-        layar.blit(self.sky_surface, (0,0))
-        layar.blit(self.ground_surface, (0,254))
+    def display_bg_blur(self):
+        screen.blit(self.sky_surface_blur, (0,0))
+        screen.blit(self.ground_surface, (0,500))

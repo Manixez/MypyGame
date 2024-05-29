@@ -2,24 +2,20 @@ import pygame
 from dasar import *
 
 # melakukan perhitungan sesajen yang didapat dan menampilkan sesajen saat game akan mulai
-class Sesajen(pygame.sprite.Sprite):
-    def __init__(self, sum, cn):
+class SesajenPalsu(pygame.sprite.Sprite):
+    def __init__(self):
         super().__init__()
 
         self.__sesajen_display = pygame.image.load('Assets/sajen/Sesajen.png').convert_alpha()
         self.__sesajen_display = pygame.transform.scale(self.__sesajen_display,(70,70))
-
-        self.__sesajen_index = 0
-        self.__sesajen_list = [self.__sesajen_display]
+        self.__sesajen_display.fill((255,255,255), self.__sesajen_display.get_rect(), pygame.BLEND_RGB_SUB)
         
+        self.__sesajen_index = 0 
+        self.__sesajen_list = [self.__sesajen_display]
         self.image = self.__sesajen_list[self.__sesajen_index]
         self.rect = self.image.get_rect(midbottom = (1100, 250))
-        
         self.__sesajen_display_rect = self.image.get_rect(center = (450, 40))
-        self.__total_sesajen = sum
-        self.__sesajen = sajen.render(f"{cn}", False, ("#e6e7e7"))
-        self.__sesajen_in_run = sajen.render(f"{sum}", False, ("#e6e7e7"))
-        self.__sesajen_rect = self.__sesajen.get_rect(midtop = (500, 0))
+        self.__sesajen_rect = self.image.get_rect(midtop = (500, 0))
         
 
     def mask(self):

@@ -1,5 +1,5 @@
 import pygame
-from abc import ABC, abstractclassmethod
+from abc import ABC, abstractmethod
 from dasar import *
 
 # parrent class
@@ -7,11 +7,11 @@ class Button(ABC):
     def __init__(self):
         pass
 
-    @abstractclassmethod
+    @abstractmethod
     def button_display(self):
         pass
     
-    @abstractclassmethod
+    @abstractmethod
     def action(self):
         pass
 
@@ -19,14 +19,15 @@ class Button(ABC):
 class Button_play(Button):
     def __init__(self):
         super().__init__()
-        self.button = pygame.image.load('Assets\Tombol\mulai.jpg').convert_alpha()
-        self.x = 100
-        self.y = 39
+        self.button = pygame.image.load('Assets/Tombol/mulai.png').convert_alpha()
+        self.button = pygame.transform.scale(self.button,(100,50))
+        self.x = 500
+        self.y = 400
         self.rect = self.button.get_rect(center = (self.x, self.y))
         self.cond = True
     
     def button_display(self):
-        layar.blit(self.button, self.rect)
+        screen.blit(self.button, self.rect)
 
     def action(self):
         pass    
@@ -34,74 +35,52 @@ class Button_play(Button):
     def update(self):
         self.action()
 
-# berfungsi untuk menampilkan menu setting / pause pada saat game dimulai
-class Button_setting(Button):
+# berfungsi untuk menampilkan pause pada saat game dimulai
+class Button_Pause(Button):
     def __init__(self):
         super().__init__()
-        self.button = pygame.image.load('').convert_alpha()
-        self.bg = pygame.image.load('').convert_alpha()
-        self.setting_message = font.render(f"Setting", False, ("#F0F0F0"))
-        self.rect_board = self.bg.get_rect(center = (800, 350))
-        self.setting_message_rect = self.setting_message.get_rect(center = (800, 200))
-        self.x = 1500
+        self.button = pygame.image.load('Assets/Tombol/pause.png').convert_alpha()
+        self.button = pygame.transform.scale(self.button, (100,80))
+        self.bg = pygame.image.load('Assets/Bg/Background2.jpg').convert_alpha()
+        self.setting_message = font.render(f"Pause", False, ("#e6e7e7"))
+        self.rect_board = self.bg.get_rect(center = (500, 350))
+        self.setting_message_rect = self.setting_message.get_rect(center = (500, 200))
+        self.x = 900
         self.y = 80
-        self.rect = self.button.get_rect(center = (self.x, self.y))
+        self.rect = self.button.get_rect(topright = (self.x, self.y))
         self.cond = True
         self.jenis = "setting"
     
     def button_display(self):
-        layar.blit(self.button, self.rect)
+        screen.blit(self.button, self.rect)
 
     def action(self, cond):
         return cond
     
     def display_board(self):
-        layar.blit(self.bg, self.rect_board)
-        layar.blit(self.setting_message, self.setting_message_rect)
+        screen.blit(self.bg, self.rect_board)
+        screen.blit(self.setting_message, self.setting_message_rect)
         
     def update(self):
         self.action()
 
 # berfungsi untuk menampilkan menu pilih tema pada homepage
-class Button_shop(Button,):
-    def __init__(self):
+class Button_Theme(Button):
+    def __init__(self, number, x, y):
         super().__init__()
-        self.button = pygame.image.load('').convert_alpha()
-        self.close = pygame.image.load('').convert_alpha()
-        self.thema1 = pygame.image.load('asset/img/thema/1.png').convert_alpha()
-        self.thema1_pick = pygame.image.load('asset/img/thema/1_lock.png').convert_alpha()
-        self.thema2 = pygame.image.load('asset/img/thema/2.png').convert_alpha()
-        self.thema2_pick = pygame.image.load('asset/img/thema/2_lock.png').convert_alpha()
-        self.shop_message = font.render(f"Shop", False, ("#F0F0F0"))
-        self.rect_board = self.bg.get_rect(center = (800, 360))
-        self.rect_close = self.bg.get_rect(center = (1650, 400))
-        self.shop_rect = self.shop_message.get_rect(center = (800, 200))
-        self.thema1_rect = self.thema1.get_rect(center = (600, 350))
-        self.thema2_rect = self.thema2.get_rect(center = (1000, 350))
-        self.x = 1500
-        self.y = 80
-        self.rect = self.button.get_rect(center = (self.x, self.y))
-        self.cond = True
-        self.jenis = "thema"
+        self.button = pygame.image.load(f'Assets/Bg/Background{number + 1}.jpg').convert_alpha()
+        self.button = pygame.transform.scale(self.button,(200, 110))
+        self.x = x
+        self.y = y
+        self.rect = self.button.get_rect()
+        self.rect.topleft = (x, y)
     
+    def action(self):
+        pass
+
     def button_display(self):
-        layar.blit(self.button, self.rect)    
+        screen.blit(self.button, self.rect)    
 
-    def display_board(self,thema):
-        layar.blit(self.bg, self.rect_board)
-        layar.blit(self.shop_message, self.shop_rect)
-        layar.blit(self.close, self.rect_close)
-        if thema == 1:
-            layar.blit(self.thema1_pick, self.thema1_rect)
-            layar.blit(self.thema2, self.thema2_rect)
-        elif thema == 2:
-            layar.blit(self.thema1, self.thema1_rect)
-            layar.blit(self.thema2_pick, self.thema2_rect)
-        
-
-    def action(self, cond):
-        return cond
-        
     def update(self):
         self.action()
 
@@ -109,15 +88,16 @@ class Button_shop(Button,):
 class Button_resume(Button):
     def __init__(self):
         super().__init__()
-        self.button = pygame.image.load('asset/img/button/resume.png').convert_alpha()
-        self.x = 900
-        self.y = 450
+        self.button = pygame.image.load('Assets/Tombol/mulai.png').convert_alpha()
+        self.button = pygame.transform.scale(self.button,(100,50))
+        self.x = 500
+        self.y = 300
         self.rect = self.button.get_rect(center = (self.x, self.y))
         self.cond = True
         self.jenis = "resume"
     
     def button_display(self):
-        layar.blit(self.button, self.rect)
+        screen.blit(self.button, self.rect)
 
     def action(self):
         pass
@@ -129,20 +109,20 @@ class Button_resume(Button):
 class Button_home(Button):
     def __init__(self):
         super().__init__()
-        self.button = pygame.image.load('asset/img/button/home.png').convert_alpha()
-        self.button_game_over = pygame.image.load('asset/img/button/home.png').convert_alpha()
+        self.button = pygame.image.load('Assets/Tombol/home.png').convert_alpha()
+        self.button_game_over = pygame.image.load('Assets/Tombol/game_end.png').convert_alpha()
         self.x = 700
         self.y = 450
         self.rect = self.button.get_rect(center = (self.x, self.y))
-        self.rect_game_over = self.button.get_rect(center = (800, 410))
+        self.rect_game_over = self.button.get_rect(center = (500, 410))
         self.cond = True
         self.jenis = "home"
     
     def button_display(self):
-        layar.blit(self.button, self.rect)
+        screen.blit(self.button, self.rect)
     
     def button_display_game_over(self):
-        layar.blit(self.button_game_over, self.rect_game_over)
+        screen.blit(self.button_game_over, self.rect_game_over)
 
     def action(self):
         pass

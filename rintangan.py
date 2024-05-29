@@ -1,32 +1,18 @@
+from random import randint, random
 import pygame
 
-# berfungsi unutuk mengatur tampilan obtacle dimana obtacle akan ditampilkan secara random dari 9 asset yang ada
 class Rintang(pygame.sprite.Sprite):
-    def __init__(self, index):
+    ground = 410
+
+    def __init__(self):
         super().__init__()
-        obstacle_1 = pygame.image.load('Assets\Rintangan\bawang.jpg').convert_alpha()
-        obstacle_2 = pygame.image.load('').convert_alpha()
-
-        self.obstacle_list = [obstacle_1, obstacle_2]
-
-        self.obstacle_index = index
-        self.image = self.obstacle_list[self.obstacle_index]
-        self.rect = self.image.get_rect(bottomright = (1700, 680))
-
-    
-    def mask(self):
-        for i in self.obstacle_list:
-            pygame.mask.from_surface(i)
-
-    def random_obstacle(self):
-        self.image = self.obstacle_list[self.obstacle_index]
-
-    def destroy(self):
-        if self.rect.x <= -100:
-            self.kill()
+        imageName = "Onion.png" if randint(0, 1) else "batu.png"
+        self.image = pygame.image.load(f"Assets/Rintangan/{imageName}").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (140,140) )
+        self.rect = self.image.get_rect(topleft = (1100, Rintang.ground))
+        pygame.mask.from_surface(self.image)
 
     def update(self):
-        self.mask()
-        self.random_obstacle()
-        self.destroy()
+        if self.rect.right <= 0:
+            self.kill()
         self.rect.x -= 10 

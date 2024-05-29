@@ -1,19 +1,18 @@
 # import modul
 import pygame
-import time
 import json
 from sys import exit
 from random import randint
+from SesajenPalsu import SesajenPalsu
 from rintangan import *
 from ghost import *
-from Skor import skor
+from Skor import Skor
 from dasar import *
 from sesajen import *
 from button import *
 from background import *
-# deklarasi variable dengan value nama file json
-filename = "data.json"
 
+filename = "data.json"
 
 # method hantu bertabrakan dengan rintangan
 def collision_sprite(a):
@@ -21,7 +20,8 @@ def collision_sprite(a):
     if pygame.sprite.spritecollide(player.sprite, obstacle_group, False):
         player.sprite.game_over_sound_play() # play suara game_over_sound_play()
         obstacle_group.empty() # mengosongkan grup obstacle
-        sesajen_group.empty()  #mengosongkan grup koin
+        sesajen_group.empty()  #mengosongkan grup sesajen
+        sesajen_palsu_group.empty()  #mengosongkan grup sesajen palsu
         bg_music.stop() # backsound akan dimatikan
         return False, 0
     elif a == 3 : 
@@ -29,10 +29,17 @@ def collision_sprite(a):
     else :
         return True, a
     
-# method player mengenai koin
-def coin():
+# method player mengenai sesajen
+def onSesajenCollide():
     if pygame.sprite.spritecollide(player.sprite, sesajen_group, True):
-        player.sprite.get_point_sound_play() # play get_point_sound_play()
+        player.sprite.get_sesajen_sound_play()
+        return True
+    else:
+        return False
+    
+def onSesajenPalsuCollide():
+    if pygame.sprite.spritecollide(player.sprite, sesajen_palsu_group, True):
+        player.sprite.get_sesajen_sound_play()
         return True
     else:
         return False
@@ -44,85 +51,78 @@ def jsonread():
         for data in temp:
             cn = data["Sesajen"] 
             sk = data["skor"]
-            by = data["buy"]
             thm = data["thema"]
-        return cn, sk, by, thm
+        return cn, sk, thm
     
-# method unutk mengedit data file json
-def jsonedit(cn, sk, by, thm):
-    temp1 = {}
+# method untuk mengedit data file json
+def jsonedit(cn, sk, thm):
+    new_data = {}
     with open(filename, "r") as f:
-        temp = json.load(f)
-        del temp[0]
+        current_data = json.load(f)
+        del current_data[0]
     with open(filename, "w") as f:
-        json.dump(temp, f, indent = 4)
+        json.dump(current_data, f, indent = 4)
     with open(filename, "r") as f:
-        temp = json.load(f)
+        current_data = json.load(f)
 
-    temp1["coin"]  = cn
-    temp1["skor"] = sk
-    temp1["buy"] = buy
-    temp1["thema"] = thm
-    temp.append(temp1)
+    new_data["Sesajen"]  = cn
+    new_data["skor"] = sk
+    new_data["thema"] = thm
+    current_data.append(new_data)
+
     with open(filename, "w") as f:
-        json.dump(temp, f, indent = 4)
+        json.dump(current_data, f, indent = 4)
     
-    return cn, sk, by, thm
+    return cn, sk, thm
 
 
 pygame.init()
-cn, sk, by, thm = jsonread() # deklarasi variable cn, sk, by, thm = jsonread()
-screen = layar # ukuran screen 
 pygame.display.set_caption("Ghost Jump")
+
+cn, sk, thm = jsonread() # deklarasi variable cn, sk, thm = jsonread()
 icon = pygame.image.load('Assets//Bg/Icon.png') 
 bg_music = pygame.mixer.Sound("Assets/Suara/Backsound.mp3") # backsound
 pygame.display.set_icon(icon) # mengatur icon
 game_active = False
 sesajen_count= 0
-status = 1
+game_state = 1
 cond_button = ""
 bg_music.set_volume(0.1) # set voulume
-FPS = 60
 clock = pygame.time.Clock()
 skor_count = 0
-cond = 0
-cond_shop = 0
 thema = thm
-buy = by
-
+cond = False
 
 # deklarasi objek
-bg1 = Bg_1()
-bg2 = Bg_2()
+bg1 = Bg('Background1')
+bg2 = Bg('Background2')
 
 button_play = Button_play()        
-button_shop = Button_shop()
-button_setting = Button_setting()
 button_resume = Button_resume()
 button_home = Button_home()
+button_resume = Button_resume()
+button_theme_1 = Button_Theme(0, 150, 250)
+button_theme_2 = Button_Theme(1, 650, 250)
 
-
-
-obstacle_group = pygame.sprite.Group(
+obstacle_group = pygame.sprite.Group()
 sesajen_group = pygame.sprite.Group()
+sesajen_palsu_group = pygame.sprite.Group()
+
 
 player = pygame.sprite.GroupSingle()
-player.add(Kucing_1())
+player_1 = player.add(Hantu("kuyang"))
+player_2 = player.add(Hantu("pocong"))
 
 
 # deklarasi vaiable unutuk game over
 game_over = font.render("Game Over", False, ("#F0F0F0"))
-game_over_rect = game_over.get_rect(center = (800, 150))
-board_surf = pygame.image.load("asset/img/bg/board/end.png")
-board_rect = board_surf.get_rect(center = (800, 255))
-
-# timer unutuk berapa lama waktu jeda obtacle keluar setelah game dimulai
-obstacle_timer = pygame.USEREVENT + 1
-pygame.time.set_timer(obstacle_timer, 2000)
-
+game_over_rect = game_over.get_rect(center = (500, 150))
+board_surf = pygame.image.load("Assets/Bg/Background2_blur.jpg")
+board_surf = pygame.transform.scale(board_surf,(1000,600))
+board_rect = board_surf.get_rect(center = (500, 300))
 
 while True:
-    cn, sk, by, thm = jsonread() # deklarasi variable cn, sk, by, thm = jsonread()
+    cn, sk, thm = jsonread() # deklarasi variable cn, sk, thm = jsonread()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -130,153 +130,159 @@ while True:
 
         if game_active:
             if event.type == obstacle_timer:
-                obstacle_group.add(Obstacle(randint(0,8))) # random obtacle
-                sesajen_group.add(sesajen(sesajen_count, cn))
+                obstacle_group.add(Rintang())
+            if event.type == sesajen_timer:
+                # pembuatan sesajen asli atau palsu secara random menggunakan fungsi randint()
+                # randint(0, 10) != 0 mengartikan kemungkinan sesajen palsu adalah 1 dari 10
+                # randint(0, 100) != 0 mengartikan kemungkinan sesajen palsu adalah 1 dari 100
+                # dst...
+                isPalsu = randint(0, 5) != 0
+                if isPalsu:
+                    sesajen_palsu_group.add(SesajenPalsu())
+                else:
+                    sesajen_group.add(Sesajen(sum, cn))
 
-        elif game_active == False and status == 0: 
+        elif game_active == False and game_state == 0: 
             button_home.button_display_game_over()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if button_home.rect_game_over.collidepoint(pygame.mouse.get_pos()):
                     game_active = False       
-                    status = 1
+                    game_state = 1
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                if status == 0:
+                if game_state == 0:
                     bg_music.play()
-                status = 2
+                game_state = 2
                 game_active = True
                 start_time = int(pygame.time.get_ticks() / 1000)
 
-                
-                
 
-    
-# untuk tamppilan home 
-    if game_active == False and status == 1:
+
+
+
+
+    # TAMPILAN HOME
+    if game_active == False and game_state == 1:
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if cond_shop != True:
-                if button_play.rect.collidepoint(pygame.mouse.get_pos()):
+            if button_play.rect.collidepoint(pygame.mouse.get_pos()):
                     button_pressed = button_play.action()
                     bg_music.play()
-                    status = 2
+                    game_state = 2
                     game_active = True
                     start_time = int(pygame.time.get_ticks() / 1000)
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if button_shop.rect.collidepoint(pygame.mouse.get_pos()):
-                    cond_shop =  button_shop.action(True)
- 
-        # untuk mengatur tampilan tema
-        else:
-            if thema == 1:
-                bg1.display_bg()
-                bg1.display_logo()
-                sesajen(coin_count, cn).display_sesajen()
-            elif thema == 2:
-                bg2.display_bg()
-                bg1.display_logo()
-                sesajen(coin_count, cn).display_sesajen()
-            button_shop.button_display()
-            button_play.button_display()
-            intro_message = font.render("Press Button to run", False, ("#f9981f"))
-            intro_message_rect = intro_message.get_rect(center = (250, 150))
-            screen.blit(intro_message, intro_message_rect)
+            elif button_theme_1.rect.collidepoint(pygame.mouse.get_pos()):
+                thema = 0
+            elif button_theme_2.rect.collidepoint(pygame.mouse.get_pos()):
+                thema = 1
+
+        bg = bg1 if thema == 0 else bg2
+        bg.display_bg_blur()
+        bg.display_logo()
+        
+        Sesajen(sesajen_count, cn).display_sesajen()
+        button_play.button_display()
+        button_theme_1.button_display()
+        button_theme_2.button_display()
+
+        intro_message = font.render("Press Button to run", False, ("#f9981f"))
+        intro_message_rect = intro_message.get_rect(center = (250, 150))
 
 
     if skor_count > 0 and skor_count <= 0.01:
         bg_music.play()
 
-    # untuk mengatur tampilan tema
+    # TAMPILAN GAME BERJALAN
     if game_active:
-        if thema == 1:
-            bg1.display_bg()
-            sesajen(coin_count, cn).display_sesajen_in_run()
-        elif thema == 2:
-            bg2.display_bg()
-            sesajen(coin_count, cn).display_sesajen_in_run()
-        
-        # mengatur skor
-        score = skor(int(skor_count))
+        (bg1 if thema == 0 else bg2).display_bg()
+
+        score = Skor(int(skor_count))
         score.update()
         
-        # menampilkan objek
         player.draw(screen)
         player.update()
-        obstacle_group.draw(screen)
-        obstacle_group.update()
+
+        newSesajen = Sesajen(sesajen_count, cn).display_sesajen_in_run()
+        
         sesajen_group.draw(screen)
         sesajen_group.update()
-        button_play.update()
+
+        sesajen_palsu_group.draw(screen)
+        sesajen_palsu_group.update()
+        
+        obstacle_group.draw(screen)
+        obstacle_group.update()
 
         # jika status 2 dan game_active True maka game dumulai
-        if game_active == True and status == 2:
+        if game_active == True and game_state == 2:
             skor_count += 0.01
-            button_setting.button_display()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                    if button_setting.rect.collidepoint(pygame.mouse.get_pos()):
-                        cond = button_setting.action(True)
-            if cond == True:
-                status = 3
 
+            button_resume.button_display()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                    if button_resume.rect.collidepoint(pygame.mouse.get_pos()):
+                        cond = button_resume.action(True)
+            
+            if cond == True:
+                game_state = 3
 
         # memanggil method collision_sprite() mengatur jika player bertabrakan dengan obstacle
-        game_active, status = collision_sprite(status)
+        game_active, game_state = collision_sprite(game_state)
         
-        # jika get tru coin_count akan ditambahkan 1
-        get = coin()
-        if get == True:
-            coin_count+= 1
-            Koin(coin_count, cn)
+        if onSesajenCollide():
+            sesajen_count += 1
+            Sesajen(sesajen_count, cn)
+        if onSesajenPalsuCollide():
+            player.sprite.flipJump()
         
 
-        #jika status 0 dan game_active false maka game over
-        if  game_active == False and status == 0:
-            if skor_count > sk:
-                score_message = font.render(f"Hight Score  {int(skor_count)}", False, ("#F0F0F0"))
-            else:
-                score_message = font.render(f"Your Score  {int(skor_count)}", False, ("#F0F0F0"))
-            total_koin_message = font.render(f"Total Coin  {coin_count}", False, ("#F0F0F0"))
+    # GAME OVER
+    if  game_active == False and game_state == 0:
+        player.sprite.resetJump()
+        score_message = font.render(f"{'High' if skor_count > sk else 'Your'} Score {int(skor_count)}", False, pygame.Color("#F0F0F0"))
+        total_koin_message = font.render(f"Total Coin  {sesajen_count}", False, pygame.Color("#F0F0F0"))
 
-            score_message_rect = score_message.get_rect(center = (800, 250))
-            total_koin_message_rect = score_message.get_rect(center = (800, 320))
+        score_message_rect = score_message.get_rect(center = (500, 250))
+        total_koin_message_rect = score_message.get_rect(center = (500, 320))
 
-            screen.blit(board_surf, board_rect)
-            screen.blit(game_over, game_over_rect)
+        screen.blit(board_surf, board_rect)
+        screen.blit(game_over, game_over_rect)
 
-            screen.blit(score_message, score_message_rect)
-            screen.blit(total_koin_message, total_koin_message_rect)
+        screen.blit(score_message, score_message_rect)
+        screen.blit(total_koin_message, total_koin_message_rect)
 
-            intro_message = font.render("Press space to run", False, ("#f9981f"))
-            intro_message_rect = intro_message.get_rect(center = (800, 570))
-            screen.blit(intro_message, intro_message_rect)
-            kn = Koin(coin_count, cn).koin_return(cn)
-            if sk < int(skor_count):
-                jsonedit(kn, int(skor_count), buy, thema)
-            else:
-                jsonedit(kn, sk, buy, thema)
-            coin_count = 0
-            skor_count = 0
-    # jika sattus 3 dan game_active False maka game akan pause
-    if game_active == False and status == 3:
-        button_setting.display_board()
+        intro_message = font.render("Press space to run", False, ("#f9981f"))
+        intro_message_rect = intro_message.get_rect(center = (500, 570))
+
+        screen.blit(intro_message, intro_message_rect)
+        kn = Sesajen(sesajen_count, cn).sesajen_return(cn)
+        if sk < int(skor_count):
+            jsonedit(kn, int(skor_count), thema)
+        else:
+            jsonedit(kn, sk, thema)
+        sesajen_count = 0
+        skor_count = 0
+
+    # PAUSE
+    if game_active == False and game_state == 3:
+        button_resume.display_board()
         button_resume.button_display()
         button_home.button_display()
 
-        #melanjutkan game
+        # CONTINUE
         if event.type == pygame.MOUSEBUTTONDOWN:
             if button_resume.rect.collidepoint(pygame.mouse.get_pos()):
                 cond = False
                 game_active = True
-                status = 2
-        # kem bali ke home
+                game_state = 2
+
+        # HOME
         if event.type == pygame.MOUSEBUTTONDOWN:
             if button_home.rect.collidepoint(pygame.mouse.get_pos()):
                 cond = False
                 game_active = False            
-                coin_count = 0
+                sesajen_count = 0
                 skor_count = 0
-                status = 1
+                game_state = 1
                 bg_music.stop()
-
 
     pygame.display.update()
     clock.tick(FPS)
