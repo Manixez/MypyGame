@@ -8,7 +8,7 @@ class Player(pygame.sprite.Sprite, ABC):
 
         self.gravity = 0
         self.jump_sound = pygame.mixer.Sound('asset/audio/jump.mp3')
-        self.koin_get = pygame.mixer.Sound('asset/audio/get_coin.mp3')
+        self.sesajen_get = pygame.mixer.Sound('asset/audio/get_coin.mp3')
         self.game_over_sound = pygame.mixer.Sound('asset/audio/game_over.mp3')
 
     @abstractclassmethod
@@ -37,9 +37,9 @@ class Player(pygame.sprite.Sprite, ABC):
         self.game_over_sound.play()
         self.game_over_sound.set_volume(0.2)
 
-    def get_koin_sound_play(self):
-        self.koin_get.play()
-        self.koin_get.set_volume(0.3)
+    def get_sesajen_sound_play(self):
+        self.sesajen_get.play()
+        self.sesajen_get.set_volume(0.3)
 
     def update(self):
         self.masking()
@@ -85,10 +85,10 @@ class Hantu1(Player):
 class Hantu2(Player):
     def __init__(self):
         super().__init__()
-        player_walk = pygame.image.load('Assets\Ghost\kuyang.jpg').convert_alpha()
+        player_walk = pygame.image.load('Assets/Ghost/kuyang.jpg').convert_alpha()
         self.player_walk = [player_walk]
 
-        player_jump = pygame.image.load('Assets\Ghost\kuyang.jpg').convert_alpha()
+        player_jump = pygame.image.load('Assets/Ghost/kuyang.jpg').convert_alpha()
         self.player_jump = [player_jump]
         self.player_index = 0
 

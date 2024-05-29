@@ -3,8 +3,8 @@ from dasar import *
 
 class Bg():
     def __init__(self):
-        self.logo_surf = pygame.image.load('')
-        self.logo_rect = self.logo_surf.get_rect(center = (800, 255))
+        self.logo_surf = pygame.image.load('Assets\Bg\Icon.png')
+        self.logo_rect = self.logo_surf.get_rect(center = (285, 100))
 
 
     def display_logo(self):

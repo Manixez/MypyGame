@@ -19,9 +19,9 @@ class Button(ABC):
 class Button_play(Button):
     def __init__(self):
         super().__init__()
-        self.button = pygame.image.load('Assets\tombol\mulai.jpg').convert_alpha()
-        self.x = 300
-        self.y = 112
+        self.button = pygame.image.load('Assets\Tombol\mulai.jpg').convert_alpha()
+        self.x = 100
+        self.y = 39
         self.rect = self.button.get_rect(center = (self.x, self.y))
         self.cond = True
     
@@ -62,7 +62,7 @@ class Button_setting(Button):
     def update(self):
         self.action()
 
-# berfungsi untuk menampilkan menu shop / pilih tema pada homepage
+# berfungsi untuk menampilkan menu pilih tema pada homepage
 class Button_shop(Button,):
     def __init__(self):
         super().__init__()
@@ -149,24 +149,4 @@ class Button_home(Button):
         
     def update(self):
         self.action()
-
-# jika tema yang terkunci belum dibuka class ini berfungsi untuk membeli tema yang belum terbuka
-class Button_buy(Button):
-    def __init__(self):
-        super().__init__()
-        self.button = pygame.image.load('asset/img/button/buy.png').convert_alpha()
-        self.x = 1000
-        self.y = 350
-        self.rect = self.button.get_rect(center = (self.x, self.y))
-        self.cond = True
-        self.harga = 10
-        self.jenis = "buy"
-    
-    def button_display(self):
-        layar.blit(self.button, self.rect)
-
-    def action(self, cond):
-        return cond
         
-    def update(self):
-        self.action()
